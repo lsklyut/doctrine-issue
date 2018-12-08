@@ -1,0 +1,11 @@
+{
+    "name": "lsklyut/doctrine-bug",
+    "require": {
+        "doctrine/orm": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "LeoDoctrineBug\\": "src/"
+        }
+    }
+}
