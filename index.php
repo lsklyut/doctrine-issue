@@ -2,10 +2,8 @@
 
 use Doctrine\ORM\EntityManager;
 use LeoDoctrineBug\Entity\Book;
-use LeoDoctrineBug\Entity\Gadget;
 use LeoDoctrineBug\Entity\Student;
 
-const STARTING_NUMBER_OF_GADGETS = 3;
 require 'bootstrap.php';
 
 const STARTING_NUMBER_OF_BOOKS = 5;
@@ -17,33 +15,22 @@ function testScenarioCreatesDuplicates(EntityManager $entityManager)
 {
     $student = setUpStudent($entityManager);
 
-    // At this point we have a student with 5 books and 3 gadgets.
+    $books = $student->getBooks();
 
-    foreach ($student->getBooks() as $book) {
+    foreach ($books as $book) {
+        // The entity we're removing needs to be removed from the 1-M collection it belongs to.
+        // Otherwise, duplicates will be created
+        $books->removeElement($book);
+
         $entityManager->remove($book);
         $entityManager->flush($book);
     }
 
     setUpBooksForStudent($entityManager, $student);
 
-    foreach ($student->getGadgets() as $gadget) {
-        $entityManager->remove($gadget);
-        $entityManager->flush($gadget);
-    }
-
-    setUpGadgetsForStudent($entityManager, $student);
-
-    $entityManager->flush();
-
-    // At this point we have a student with 10 books and 6 gadgets.
-
-    $wereBooksDuplicated = count($student->getBooks()) == 2 * STARTING_NUMBER_OF_BOOKS;
+    $wereBooksDuplicated = count($books) == 2 * STARTING_NUMBER_OF_BOOKS;
 
     print "Books were " . ($wereBooksDuplicated ? '' : 'not ') . 'duplicated.' . PHP_EOL;
-
-    $wereGadgetsDuplicated = count($student->getGadgets()) == 2 * STARTING_NUMBER_OF_GADGETS;
-
-    print "Gadgets were " . ($wereGadgetsDuplicated ? '' : 'not ') . 'duplicated.' . PHP_EOL;
 }
 
 /**
@@ -58,7 +45,6 @@ function setUpStudent(EntityManager $entityManager)
     $entityManager->persist($student);
 
     setUpBooksForStudent($entityManager, $student);
-    setUpGadgetsForStudent($entityManager, $student);
 
     $entityManager->flush();
     return $student;
@@ -78,26 +64,6 @@ function setUpBooksForStudent(EntityManager $entityManager, Student $student)
 
         $entityManager->persist($book);
         $entityManager->flush($book);
-    }
-}
-
-/**
- * @param EntityManager $entityManager
- * @param Student $student
- */
-function setUpGadgetsForStudent(EntityManager $entityManager, Student $student)
-{
-    $gadgets = ['laptop', 'phone', 'smartwatch'];
-
-    foreach ($gadgets as $gadgetName) {
-        $gadget = new Gadget();
-        $gadget->setName($gadgetName);
-
-        $gadget->setStudent($student);
-        $student->addGadget($gadget);
-
-        $entityManager->persist($gadget);
-        $entityManager->flush($gadget);
     }
 }
 

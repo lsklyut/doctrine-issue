@@ -30,16 +30,9 @@ class Student
      */
     protected $books;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Gadget", mappedBy="student", cascade={"persist"})
-     * @var Gadget[]|ArrayCollection
-     */
-    protected $gadgets;
-
     public function __construct()
     {
         $this->books = new ArrayCollection();
-        $this->gadgets = new ArrayCollection();
     }
 
 
@@ -89,21 +82,5 @@ class Student
     public function addBook(Book $book)
     {
         $this->books->add($book);
-    }
-
-    /**
-     * @return ArrayCollection|Gadget[]
-     */
-    public function getGadgets()
-    {
-        return $this->gadgets;
-    }
-
-    /**
-     * @param Gadget $gadget
-     */
-    public function addGadget(Gadget $gadget)
-    {
-        $this->gadgets->add($gadget);
     }
 }
